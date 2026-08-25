@@ -1,0 +1,30 @@
+{
+  "name": "@js/worker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Standalone job worker process",
+  "main": "dist/worker.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/worker.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/worker.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "echo 'lint ok'"
+  },
+  "dependencies": {
+    "@js/shared": "workspace:*",
+    "@prisma/client": "^5.22.0",
+    "dotenv": "^17.4.2",
+    "ioredis": "^5.4.2",
+    "jsonwebtoken": "^9.0.2",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/winston": "^2.4.4",
+    "prisma": "^5.22.0",
+    "ts-node-dev": "^2.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

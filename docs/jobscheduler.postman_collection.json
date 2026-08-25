@@ -1,0 +1,349 @@
+{
+  "info": {
+    "_postman_id": "b1a7c2de-4f30-4e8a-9c21-a5d0e7f1b2c3",
+    "name": "JobScheduler API",
+    "description": "Collection for the JobScheduler distributed job scheduling platform. Set {{base_url}} and {{token}} collection variables — the Login request automatically stores the access token into {{token}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:4000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alice@example.com\",\n  \"password\": \"supersecret1\",\n  \"name\": \"Alice\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Login succeeded\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "const res = pm.response.json();",
+                  "if (res.data && res.data.accessToken) {",
+                  "    pm.collectionVariables.set(\"token\", res.data.accessToken);",
+                  "    console.log(\"{{token}} collection variable set from login response\");",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"demo@jobscheduler.dev\",\n  \"password\": \"demo1234\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Refresh",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/auth/refresh", "host": ["{{base_url}}"], "path": ["auth", "refresh"] },
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"<refreshToken>\"\n}" }
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/auth/me", "host": ["{{base_url}}"], "path": ["auth", "me"] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{base_url}}/auth/logout", "host": ["{{base_url}}"], "path": ["auth", "logout"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Organizations",
+      "item": [
+        {
+          "name": "Create org",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/orgs", "host": ["{{base_url}}"], "path": ["orgs"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Acme Corp\",\n  \"description\": \"Demo organization\"\n}" }
+          }
+        },
+        { "name": "List my orgs", "request": { "method": "GET", "url": { "raw": "{{base_url}}/orgs", "host": ["{{base_url}}"], "path": ["orgs"] } } },
+        { "name": "Get org", "request": { "method": "GET", "url": { "raw": "{{base_url}}/orgs/:orgSlug", "host": ["{{base_url}}"], "path": ["orgs", ":orgSlug"], "variable": [{ "key": "orgSlug", "value": "acme" }] } } },
+        {
+          "name": "Update org",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/orgs/:orgSlug", "host": ["{{base_url}}"], "path": ["orgs", ":orgSlug"], "variable": [{ "key": "orgSlug", "value": "acme" }] },
+            "body": { "mode": "raw", "raw": "{\n  \"description\": \"Updated description\"\n}" }
+          }
+        },
+        { "name": "Delete org", "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/orgs/:orgSlug", "host": ["{{base_url}}"], "path": ["orgs", ":orgSlug"], "variable": [{ "key": "orgSlug", "value": "acme" }] } } },
+        {
+          "name": "Add member",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/orgs/:orgSlug/members", "host": ["{{base_url}}"], "path": ["orgs", ":orgSlug", "members"], "variable": [{ "key": "orgSlug", "value": "acme" }] },
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"bob@example.com\",\n  \"role\": \"MEMBER\"\n}" }
+          }
+        },
+        {
+          "name": "Update member role",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/orgs/:orgSlug/members/:userId", "host": ["{{base_url}}"], "path": ["orgs", ":orgSlug", "members", ":userId"], "variable": [{ "key": "orgSlug", "value": "acme" }, { "key": "userId", "value": "<userId>" }] },
+            "body": { "mode": "raw", "raw": "{\n  \"role\": \"ADMIN\"\n}" }
+          }
+        },
+        { "name": "Remove member", "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/orgs/:orgSlug/members/:userId", "host": ["{{base_url}}"], "path": ["orgs", ":orgSlug", "members", ":userId"], "variable": [{ "key": "orgSlug", "value": "acme" }, { "key": "userId", "value": "<userId>" }] } } }
+      ]
+    },
+    {
+      "name": "Projects",
+      "item": [
+        {
+          "name": "Create project",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/orgs/:orgSlug/projects", "host": ["{{base_url}}"], "path": ["orgs", ":orgSlug", "projects"], "variable": [{ "key": "orgSlug", "value": "acme" }] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Platform Jobs\",\n  \"description\": \"Core platform queues\"\n}" }
+          }
+        },
+        { "name": "List projects", "request": { "method": "GET", "url": { "raw": "{{base_url}}/orgs/:orgSlug/projects", "host": ["{{base_url}}"], "path": ["orgs", ":orgSlug", "projects"], "variable": [{ "key": "orgSlug", "value": "acme" }] } } },
+        { "name": "Get project", "request": { "method": "GET", "url": { "raw": "{{base_url}}/orgs/:orgSlug/projects/:projectSlug", "host": ["{{base_url}}"], "path": ["orgs", ":orgSlug", "projects", ":projectSlug"], "variable": [{ "key": "orgSlug", "value": "acme" }, { "key": "projectSlug", "value": "platform-jobs" }] } } },
+        { "name": "Update project", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{base_url}}/orgs/:orgSlug/projects/:projectSlug", "host": ["{{base_url}}"], "path": ["orgs", ":orgSlug", "projects", ":projectSlug"], "variable": [{ "key": "orgSlug", "value": "acme" }, { "key": "projectSlug", "value": "platform-jobs" }] }, "body": { "mode": "raw", "raw": "{\n  \"name\": \"Renamed\"\n}" } } },
+        { "name": "Delete project", "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/orgs/:orgSlug/projects/:projectSlug", "host": ["{{base_url}}"], "path": ["orgs", ":orgSlug", "projects", ":projectSlug"], "variable": [{ "key": "orgSlug", "value": "acme" }, { "key": "projectSlug", "value": "platform-jobs" }] } } }
+      ]
+    },
+    {
+      "name": "Retry Policies",
+      "item": [
+        {
+          "name": "Create retry policy",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/:projectId/retry-policies", "host": ["{{base_url}}"], "path": ["projects", ":projectId", "retry-policies"], "variable": [{ "key": "projectId", "value": "<projectId>" }] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Aggressive Retry\",\n  \"strategy\": \"EXPONENTIAL\",\n  \"maxAttempts\": 5,\n  \"initialDelayMs\": 1000,\n  \"maxDelayMs\": 60000,\n  \"multiplier\": 2\n}" }
+          }
+        },
+        { "name": "List retry policies", "request": { "method": "GET", "url": { "raw": "{{base_url}}/projects/:projectId/retry-policies", "host": ["{{base_url}}"], "path": ["projects", ":projectId", "retry-policies"], "variable": [{ "key": "projectId", "value": "<projectId>" }] } } },
+        { "name": "Get retry policy", "request": { "method": "GET", "url": { "raw": "{{base_url}}/projects/:projectId/retry-policies/:policyId", "host": ["{{base_url}}"], "path": ["projects", ":projectId", "retry-policies", ":policyId"], "variable": [{ "key": "projectId", "value": "<projectId>" }, { "key": "policyId", "value": "<policyId>" }] } } },
+        { "name": "Update retry policy", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{base_url}}/projects/:projectId/retry-policies/:policyId", "host": ["{{base_url}}"], "path": ["projects", ":projectId", "retry-policies", ":policyId"], "variable": [{ "key": "projectId", "value": "<projectId>" }, { "key": "policyId", "value": "<policyId>" }] }, "body": { "mode": "raw", "raw": "{\n  \"maxAttempts\": 6\n}" } } },
+        { "name": "Delete retry policy", "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/projects/:projectId/retry-policies/:policyId", "host": ["{{base_url}}"], "path": ["projects", ":projectId", "retry-policies", ":policyId"], "variable": [{ "key": "projectId", "value": "<projectId>" }, { "key": "policyId", "value": "<policyId>" }] } } }
+      ]
+    },
+    {
+      "name": "Queues",
+      "item": [
+        {
+          "name": "Create queue",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/projects/:projectId/queues", "host": ["{{base_url}}"], "path": ["projects", ":projectId", "queues"], "variable": [{ "key": "projectId", "value": "<projectId>" }] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Emails\",\n  \"priority\": 8,\n  \"concurrencyLimit\": 20,\n  \"rateLimitPerMin\": 60\n}" }
+          }
+        },
+        { "name": "List queues", "request": { "method": "GET", "url": { "raw": "{{base_url}}/projects/:projectId/queues?page=1&limit=20", "host": ["{{base_url}}"], "path": ["projects", ":projectId", "queues"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "20" }], "variable": [{ "key": "projectId", "value": "<projectId>" }] } } },
+        { "name": "Get queue", "request": { "method": "GET", "url": { "raw": "{{base_url}}/queues/:queueId", "host": ["{{base_url}}"], "path": ["queues", ":queueId"], "variable": [{ "key": "queueId", "value": "<queueId>" }] } } },
+        { "name": "Queue stats", "request": { "method": "GET", "url": { "raw": "{{base_url}}/queues/:queueId/stats?from&to", "host": ["{{base_url}}"], "path": ["queues", ":queueId", "stats"], "query": [{ "key": "from", "value": "" }, { "key": "to", "value": "" }], "variable": [{ "key": "queueId", "value": "<queueId>" }] } } },
+        { "name": "Pause queue", "request": { "method": "POST", "url": { "raw": "{{base_url}}/projects/:projectId/queues/:queueId/pause", "host": ["{{base_url}}"], "path": ["projects", ":projectId", "queues", ":queueId", "pause"], "variable": [{ "key": "projectId", "value": "<projectId>" }, { "key": "queueId", "value": "<queueId>" }] } } },
+        { "name": "Resume queue", "request": { "method": "POST", "url": { "raw": "{{base_url}}/projects/:projectId/queues/:queueId/resume", "host": ["{{base_url}}"], "path": ["projects", ":projectId", "queues", ":queueId", "resume"], "variable": [{ "key": "projectId", "value": "<projectId>" }, { "key": "queueId", "value": "<queueId>" }] } } },
+        { "name": "Update queue", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{base_url}}/projects/:projectId/queues/:queueId", "host": ["{{base_url}}"], "path": ["projects", ":projectId", "queues", ":queueId"], "variable": [{ "key": "projectId", "value": "<projectId>" }, { "key": "queueId", "value": "<queueId>" }] }, "body": { "mode": "raw", "raw": "{\n  \"priority\": 10\n}" } } },
+        { "name": "Delete queue", "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/projects/:projectId/queues/:queueId", "host": ["{{base_url}}"], "path": ["projects", ":projectId", "queues", ":queueId"], "variable": [{ "key": "projectId", "value": "<projectId>" }, { "key": "queueId", "value": "<queueId>" }] } } }
+      ]
+    },
+    {
+      "name": "Jobs",
+      "item": [
+        {
+          "name": "Create immediate job",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/queues/:queueId/jobs", "host": ["{{base_url}}"], "path": ["queues", ":queueId", "jobs"], "variable": [{ "key": "queueId", "value": "<queueId>" }] },
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"report\",\n  \"payload\": { \"name\": \"nightly-usage\" },\n  \"priority\": 7\n}" }
+          }
+        },
+        {
+          "name": "Create delayed job",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/queues/:queueId/jobs", "host": ["{{base_url}}"], "path": ["queues", ":queueId", "jobs"], "variable": [{ "key": "queueId", "value": "<queueId>" }] },
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"email\",\n  \"payload\": { \"to\": \"x@example.com\" },\n  \"runAt\": \"2026-12-01T10:00:00Z\"\n}" }
+          }
+        },
+        {
+          "name": "Create batch job",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/queues/:queueId/jobs", "host": ["{{base_url}}"], "path": ["queues", ":queueId", "jobs"], "variable": [{ "key": "queueId", "value": "<queueId>" }] },
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"report\",\n  \"payload\": {},\n  \"batch\": {\n    \"name\": \"weekly-digest\",\n    \"jobs\": [\n      { \"payload\": { \"userId\": \"1\" }, \"priority\": 7 },\n      { \"payload\": { \"userId\": \"2\" } }\n    ]\n  },\n  \"idempotencyKey\": \"digest-w48\"\n}" }
+          }
+        },
+        {
+          "name": "Create job with dependencies",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/queues/:queueId/jobs", "host": ["{{base_url}}"], "path": ["queues", ":queueId", "jobs"], "variable": [{ "key": "queueId", "value": "<queueId>" }] },
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"report\",\n  \"payload\": {},\n  \"dependsOn\": [\"<jobId-a>\", \"<jobId-b>\"]\n}" }
+          }
+        },
+        { "name": "List jobs (filters)", "request": { "method": "GET", "url": { "raw": "{{base_url}}/queues/:queueId/jobs?status=PENDING,RUNNING&page=1&limit=20&sort=createdAt:desc", "host": ["{{base_url}}"], "path": ["queues", ":queueId", "jobs"], "query": [{ "key": "status", "value": "PENDING,RUNNING" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "20" }, { "key": "sort", "value": "createdAt:desc" }], "variable": [{ "key": "queueId", "value": "<queueId>" }] } } },
+        { "name": "Get job detail", "request": { "method": "GET", "url": { "raw": "{{base_url}}/jobs/:jobId", "host": ["{{base_url}}"], "path": ["jobs", ":jobId"], "variable": [{ "key": "jobId", "value": "<jobId>" }] } } },
+        { "name": "Cancel job", "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/jobs/:jobId", "host": ["{{base_url}}"], "path": ["jobs", ":jobId"], "variable": [{ "key": "jobId", "value": "<jobId>" }] } } },
+        { "name": "Retry job", "request": { "method": "POST", "url": { "raw": "{{base_url}}/jobs/:jobId/retry", "host": ["{{base_url}}"], "path": ["jobs", ":jobId", "retry"], "variable": [{ "key": "jobId", "value": "<jobId>" }] } } },
+        { "name": "Job executions", "request": { "method": "GET", "url": { "raw": "{{base_url}}/jobs/:jobId/executions", "host": ["{{base_url}}"], "path": ["jobs", ":jobId", "executions"], "variable": [{ "key": "jobId", "value": "<jobId>" }] } } },
+        { "name": "Execution logs", "request": { "method": "GET", "url": { "raw": "{{base_url}}/jobs/:jobId/executions/:execId/logs", "host": ["{{base_url}}"], "path": ["jobs", ":jobId", "executions", ":execId", "logs"], "variable": [{ "key": "jobId", "value": "<jobId>" }, { "key": "execId", "value": "<execId>" }] } } }
+      ]
+    },
+    {
+      "name": "Scheduled Jobs",
+      "item": [
+        {
+          "name": "Create schedule",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/queues/:queueId/schedules", "host": ["{{base_url}}"], "path": ["queues", ":queueId", "schedules"], "variable": [{ "key": "queueId", "value": "<queueId>" }] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Every minute heartbeat\",\n  \"cronExpression\": \"* * * * *\",\n  \"jobType\": \"report\",\n  \"jobPayload\": { \"name\": \"heartbeat\" },\n  \"jobPriority\": 5,\n  \"timezone\": \"UTC\"\n}" }
+          }
+        },
+        { "name": "List schedules", "request": { "method": "GET", "url": { "raw": "{{base_url}}/queues/:queueId/schedules", "host": ["{{base_url}}"], "path": ["queues", ":queueId", "schedules"], "variable": [{ "key": "queueId", "value": "<queueId>" }] } } },
+        { "name": "Get schedule", "request": { "method": "GET", "url": { "raw": "{{base_url}}/queues/:queueId/schedules/:scheduleId", "host": ["{{base_url}}"], "path": ["queues", ":queueId", "schedules", ":scheduleId"], "variable": [{ "key": "queueId", "value": "<queueId>" }, { "key": "scheduleId", "value": "<scheduleId>" }] } } },
+        { "name": "Update schedule", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{base_url}}/queues/:queueId/schedules/:scheduleId", "host": ["{{base_url}}"], "path": ["queues", ":queueId", "schedules", ":scheduleId"], "variable": [{ "key": "queueId", "value": "<queueId>" }, { "key": "scheduleId", "value": "<scheduleId>" }] }, "body": { "mode": "raw", "raw": "{\n  \"isActive\": false\n}" } } },
+        { "name": "Trigger schedule now", "request": { "method": "POST", "url": { "raw": "{{base_url}}/queues/:queueId/schedules/:scheduleId/trigger", "host": ["{{base_url}}"], "path": ["queues", ":queueId", "schedules", ":scheduleId", "trigger"], "variable": [{ "key": "queueId", "value": "<queueId>" }, { "key": "scheduleId", "value": "<scheduleId>" }] } } },
+        { "name": "Delete schedule", "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/queues/:queueId/schedules/:scheduleId", "host": ["{{base_url}}"], "path": ["queues", ":queueId", "schedules", ":scheduleId"], "variable": [{ "key": "queueId", "value": "<queueId>" }, { "key": "scheduleId", "value": "<scheduleId>" }] } } }
+      ]
+    },
+    {
+      "name": "Workers",
+      "item": [
+        {
+          "name": "Register worker",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": ["pm.request.headers.upsert({ key: \"x-worker-token\", value: pm.environment.get(\"worker_token\") || \"dev-worker-token\" });"]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "x-worker-token", "value": "dev-worker-token" }],
+            "url": { "raw": "{{base_url}}/workers/register", "host": ["{{base_url}}"], "path": ["workers", "register"] },
+            "body": { "mode": "raw", "raw": "{\n  \"hostname\": \"worker-pod-1\",\n  \"pid\": 123,\n  \"concurrency\": 5,\n  \"queueId\": null,\n  \"shardKey\": null,\n  \"version\": \"1.0.0\"\n}" }
+          }
+        },
+        {
+          "name": "Heartbeat",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "x-worker-token", "value": "dev-worker-token" }],
+            "url": { "raw": "{{base_url}}/workers/:workerId/heartbeat", "host": ["{{base_url}}"], "path": ["workers", ":workerId", "heartbeat"], "variable": [{ "key": "workerId", "value": "<workerId>" }] },
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"ACTIVE\",\n  \"jobsRunning\": 2,\n  \"jobsDone\": 41,\n  \"memoryMb\": 120.5,\n  \"cpuPercent\": null\n}" }
+          }
+        },
+        { "name": "List workers", "request": { "method": "GET", "url": { "raw": "{{base_url}}/workers", "host": ["{{base_url}}"], "path": ["workers"] } } },
+        { "name": "Get worker detail", "request": { "method": "GET", "url": { "raw": "{{base_url}}/workers/:workerId", "host": ["{{base_url}}"], "path": ["workers", ":workerId"], "variable": [{ "key": "workerId", "value": "<workerId>" }] } } },
+        { "name": "Drain worker", "request": { "method": "POST", "url": { "raw": "{{base_url}}/workers/:workerId/drain", "host": ["{{base_url}}"], "path": ["workers", ":workerId", "drain"], "variable": [{ "key": "workerId", "value": "<workerId>" }] } } }
+      ]
+    },
+    {
+      "name": "DLQ",
+      "item": [
+        { "name": "List DLQ entries", "request": { "method": "GET", "url": { "raw": "{{base_url}}/queues/:queueId/dlq?isResolved=false&page=1&limit=20", "host": ["{{base_url}}"], "path": ["queues", ":queueId", "dlq"], "query": [{ "key": "isResolved", "value": "false" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "20" }], "variable": [{ "key": "queueId", "value": "<queueId>" }] } } },
+        { "name": "Get DLQ entry", "request": { "method": "GET", "url": { "raw": "{{base_url}}/queues/:queueId/dlq/:entryId", "host": ["{{base_url}}"], "path": ["queues", ":queueId", "dlq", ":entryId"], "variable": [{ "key": "queueId", "value": "<queueId>" }, { "key": "entryId", "value": "<entryId>" }] } } },
+        { "name": "Retry DLQ entry", "request": { "method": "POST", "url": { "raw": "{{base_url}}/queues/:queueId/dlq/:entryId/retry", "host": ["{{base_url}}"], "path": ["queues", ":queueId", "dlq", ":entryId", "retry"], "variable": [{ "key": "queueId", "value": "<queueId>" }, { "key": "entryId", "value": "<entryId>" }] } } },
+        { "name": "Resolve DLQ entry", "request": { "method": "POST", "url": { "raw": "{{base_url}}/queues/:queueId/dlq/:entryId/resolve", "host": ["{{base_url}}"], "path": ["queues", ":queueId", "dlq", ":entryId", "resolve"], "variable": [{ "key": "queueId", "value": "<queueId>" }, { "key": "entryId", "value": "<entryId>" }] } } },
+        { "name": "Delete DLQ entry", "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/queues/:queueId/dlq/:entryId", "host": ["{{base_url}}"], "path": ["queues", ":queueId", "dlq", ":entryId"], "variable": [{ "key": "queueId", "value": "<queueId>" }, { "key": "entryId", "value": "<entryId>" }] } } }
+      ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "Fire event",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/events", "host": ["{{base_url}}"], "path": ["events"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"user.signed_up\",\n  \"payload\": { \"email\": \"newbie@example.com\", \"name\": \"Newbie\" },\n  \"source\": \"web-app\"\n}" }
+          }
+        },
+        { "name": "Event history", "request": { "method": "GET", "url": { "raw": "{{base_url}}/events?page=1&limit=20", "host": ["{{base_url}}"], "path": ["events"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "20" }] } } },
+        { "name": "Get event", "request": { "method": "GET", "url": { "raw": "{{base_url}}/events/:eventId", "host": ["{{base_url}}"], "path": ["events", ":eventId"], "variable": [{ "key": "eventId", "value": "<eventId>" }] } } },
+        {
+          "name": "Create trigger",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/events/triggers", "host": ["{{base_url}}"], "path": ["events", "triggers"] },
+            "body": { "mode": "raw", "raw": "{\n  \"queueId\": \"<queueId>\",\n  \"eventName\": \"user.signed_up\",\n  \"jobType\": \"email\",\n  \"jobPayloadTmpl\": { \"to\": \"{{event.email}}\", \"subject\": \"Welcome, {{event.name}}!\" }\n}" }
+          }
+        },
+        { "name": "List triggers", "request": { "method": "GET", "url": { "raw": "{{base_url}}/events/triggers", "host": ["{{base_url}}"], "path": ["events", "triggers"] } } },
+        { "name": "Toggle trigger", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "url": { "raw": "{{base_url}}/events/triggers/:triggerId", "host": ["{{base_url}}"], "path": ["events", "triggers", ":triggerId"], "variable": [{ "key": "triggerId", "value": "<triggerId>" }] }, "body": { "mode": "raw", "raw": "{\n  \"isActive\": true\n}" } } },
+        { "name": "Delete trigger", "request": { "method": "DELETE", "url": { "raw": "{{base_url}}/events/triggers/:triggerId", "host": ["{{base_url}}"], "path": ["events", "triggers", ":triggerId"], "variable": [{ "key": "triggerId", "value": "<triggerId>" }] } } }
+      ]
+    },
+    {
+      "name": "Metrics",
+      "item": [
+        { "name": "Project metrics", "request": { "method": "GET", "url": { "raw": "{{base_url}}/projects/:projectId/metrics?granularity=hour&from&to", "host": ["{{base_url}}"], "path": ["projects", ":projectId", "metrics"], "query": [{ "key": "granularity", "value": "hour" }, { "key": "from", "value": "" }, { "key": "to", "value": "" }], "variable": [{ "key": "projectId", "value": "<projectId>" }] } } },
+        { "name": "Worker fleet health", "request": { "method": "GET", "url": { "raw": "{{base_url}}/metrics/workers", "host": ["{{base_url}}"], "path": ["metrics", "workers"] } } }
+      ]
+    }
+  ]
+}

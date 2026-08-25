@@ -1,0 +1,19 @@
+node_modules/
+
+# Local environment and runtime data
+.env
+!.env.example
+dump.rdb
+
+# Build and test output
+dist/
+coverage/
+.turbo/
+*.tsbuildinfo
+
+# Local archives and editor artifacts
+*.tar.gz
+docker-compose.yml.save
+docker
+nano
+.DS_Store

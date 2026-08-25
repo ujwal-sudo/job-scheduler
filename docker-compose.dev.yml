@@ -1,0 +1,17 @@
+# Development overrides — hot reload via bind mounts
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: development
+    volumes:
+      - ./apps/api/src:/app/src
+      - ./packages/shared:/app/packages-shared-src
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+      target: development
+    volumes:
+      - ./apps/worker/src:/app/src
